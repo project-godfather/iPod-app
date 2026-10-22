@@ -2,985 +2,772 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>iPod Classic</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- jsmediatags for client-side ID3 tag parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Chicago&family=Inter:wght@400;600;700&display=swap');
-
-    /* Custom Retro & LCD Typography Styling */
-    .ipod-font {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    :root {
+      --bg-color: #121212;
+      --ipod-body: #e0e0e0;
+      --ipod-border: #b0b0b0;
+      --screen-bg: #cbe4bf;
+      --screen-text: #1a2a1a;
+      --wheel-bg: #ffffff;
+      --wheel-text: #555555;
+      --center-btn: #e6e6e6;
+      --accent: #2e522b;
+      --highlight-bg: #2e522b;
+      --highlight-text: #ffffff;
     }
-    
-    .lcd-screen {
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+
+    body.dark-theme {
+      --ipod-body: #222222;
+      --ipod-border: #111111;
+      --screen-bg: #1c2b1e;
+      --screen-text: #7cd989;
+      --wheel-bg: #111111;
+      --wheel-text: #aaaaaa;
+      --center-btn: #1d1d1d;
+      --accent: #50b05e;
+      --highlight-bg: #50b05e;
+      --highlight-text: #000000;
     }
 
-    /* Prevent selection and scrolling on click wheel drag */
-    .no-select {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
+    * {
+      box-sizing: border-box;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow: hidden;
+    }
+
+    /* iPod Body Shell */
+    .ipod-container {
+      width: 340px;
+      height: 560px;
+      background: linear-gradient(145deg, var(--ipod-body), #f0f0f0);
+      border-radius: 32px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.8), inset 0 -3px 5px rgba(0,0,0,0.2);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      border: 1px solid var(--ipod-border);
+      transition: background 0.3s, border 0.3s;
+    }
+
+    /* iPod Screen Wrapper */
+    .screen-outer {
+      width: 100%;
+      height: 220px;
+      background-color: #0d0d0d;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.4);
+      display: flex;
+    }
+
+    /* Monochrome LCD Screen */
+    .screen-inner {
+      width: 100%;
+      height: 100%;
+      background-color: var(--screen-bg);
+      color: var(--screen-text);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Screen Header */
+    .screen-header {
+      height: 24px;
+      background: rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .battery-icon {
+      width: 18px;
+      height: 9px;
+      border: 1px solid var(--screen-text);
+      border-radius: 1px;
+      padding: 1px;
+      display: flex;
+      position: relative;
+    }
+    .battery-icon::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: 2px;
+      width: 2px;
+      height: 3px;
+      background-color: var(--screen-text);
+    }
+    .battery-level {
+      height: 100%;
+      width: 80%;
+      background-color: var(--screen-text);
+    }
+
+    /* Screen Main Content Area */
+    .screen-body {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Menu List */
+    .menu-list {
+      list-style: none;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .menu-item {
+      padding: 5px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-item.active {
+      background-color: var(--highlight-bg);
+      color: var(--highlight-text);
+    }
+
+    .menu-item .chevron {
+      font-size: 10px;
+    }
+
+    /* Now Playing View */
+    .now-playing {
+      padding: 10px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .np-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      height: 105px;
+    }
+
+    .album-art {
+      width: 95px;
+      height: 95px;
+      background-color: rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .album-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .track-meta {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .track-meta .title {
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-meta .artist, .track-meta .album {
+      font-size: 11px;
+      opacity: 0.85;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Progress & Volume Bars */
+    .progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      background-color: rgba(0,0,0,0.15);
+      border: 1px solid rgba(0,0,0,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--screen-text);
+    }
+
+    .time-stamps {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Click Wheel Shell */
+    .wheel-outer {
+      width: 230px;
+      height: 230px;
+      border-radius: 50%;
+      background-color: var(--wheel-bg);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.8), inset 0 -2px 5px rgba(0,0,0,0.1);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
       touch-action: none;
+      transition: background-color 0.3s;
     }
 
-    /* Smooth Click Wheel styling */
-    .click-wheel-bg {
-      background: radial-gradient(circle at center, #f8f8f8 0%, #e0e0e0 70%, #d0d0d0 100%);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.8), inset 0 -2px 5px rgba(0,0,0,0.15);
+    .wheel-label {
+      position: absolute;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--wheel-text);
+      letter-spacing: 0.5px;
     }
 
-    .dark .click-wheel-bg {
-      background: radial-gradient(circle at center, #333333 0%, #222222 70%, #1a1a1a 100%);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1), inset 0 -2px 5px rgba(0,0,0,0.5);
+    .label-menu { top: 16px; }
+    .label-prev { left: 18px; }
+    .label-next { right: 18px; }
+    .label-play { bottom: 16px; }
+
+    /* Center Select Button */
+    .wheel-center {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffffff, var(--center-btn));
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,1);
+      border: 1px solid rgba(0,0,0,0.08);
+      z-index: 10;
     }
 
-    .center-btn {
-      background: radial-gradient(circle at center, #ffffff 0%, #ececec 100%);
-      box-shadow: 0 3px 6px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.9);
+    .wheel-center:active {
+      background: var(--center-btn);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .dark .center-btn {
-      background: radial-gradient(circle at center, #2c2c2c 0%, #1f1f1f 100%);
-      box-shadow: 0 3px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
-    }
-
-    .center-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Custom scrollbar for classic LCD look */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 3px;
+    /* Hidden File Input */
+    #file-input {
+      display: none;
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 flex flex-col items-center justify-center min-h-screen p-2 sm:p-4 no-select select-none">
+<body>
 
-  <!-- Main iPod Body Frame -->
-  <div id="ipod-container" class="relative w-full max-w-[370px] h-[670px] bg-gradient-to-b from-gray-200 via-gray-100 to-gray-300 dark:from-zinc-800 dark:via-zinc-900 dark:to-black rounded-[40px] p-5 shadow-2xl border-2 border-white/20 flex flex-col justify-between transition-colors duration-300">
-    
-    <!-- Top Hardware Details: Metallic Gloss effect & Lock switch marker -->
-    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-gray-400/40 rounded-full"></div>
+  <div class="ipod-container">
+    <!-- LCD Screen -->
+    <div class="screen-outer">
+      <div class="screen-inner">
+        <div class="screen-header">
+          <span id="header-title">iPod</span>
+          <span id="play-state-icon">⏸</span>
+          <div class="battery-icon"><div class="battery-level"></div></div>
+        </div>
 
-    <!-- iPod Screen Outer Box -->
-    <div class="w-full h-[290px] bg-black rounded-2xl p-2.5 flex flex-col justify-center shadow-inner border border-zinc-700/50">
+        <div class="screen-body" id="screen-body">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Click Wheel Controls -->
+    <div class="wheel-outer" id="click-wheel">
+      <span class="wheel-label label-menu" id="btn-menu">MENU</span>
+      <span class="wheel-label label-prev" id="btn-prev">|&#9664;&#9664;</span>
+      <span class="wheel-label label-next" id="btn-next">&#9654;&#9654;|</span>
+      <span class="wheel-label label-play" id="btn-play">&#9654;&#10074;&#10074;</span>
       
-      <!-- LCD Screen Display -->
-      <div id="lcd-screen" class="lcd-screen w-full h-full bg-slate-100 dark:bg-slate-900 rounded-lg overflow-hidden flex flex-col text-slate-900 dark:text-slate-100 ipod-font border border-slate-400/30">
-        
-        <!-- Status Header Bar -->
-        <div class="h-7 bg-gradient-to-b from-slate-200 to-slate-300 dark:from-zinc-800 dark:to-zinc-900 border-b border-slate-300 dark:border-zinc-700 px-3 flex items-center justify-between text-xs font-semibold shrink-0">
-          <div id="header-title" class="truncate max-w-[180px]">iPod</div>
-          <div class="flex items-center gap-2">
-            <!-- Play Status Indicator Icon -->
-            <span id="header-status-icon" class="text-[10px]">⏸</span>
-            <!-- Battery Icon -->
-            <div class="w-5 h-2.5 border border-slate-700 dark:border-slate-300 rounded-sm p-[1px] flex items-center">
-              <div class="h-full w-4/5 bg-slate-800 dark:bg-slate-200 rounded-[1px]"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Main Screen Content Area -->
-        <div class="relative flex-1 overflow-hidden">
-          
-          <!-- Menu View -->
-          <div id="view-menu" class="absolute inset-0 flex flex-col">
-            <div id="menu-items-list" class="flex-1 overflow-y-auto py-1">
-              <!-- Dynamically Populated Menu Items -->
-            </div>
-          </div>
-
-          <!-- Now Playing View -->
-          <div id="view-now-playing" class="absolute inset-0 hidden flex flex-col p-3 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-900 dark:to-zinc-900">
-            <div class="flex-1 flex gap-3 items-center">
-              <!-- Album Art Display -->
-              <div class="w-28 h-28 sm:w-32 sm:h-32 bg-slate-300 dark:bg-zinc-800 rounded-md overflow-hidden shadow-md shrink-0 border border-slate-400/40 flex items-center justify-center">
-                <img id="np-cover" src="" alt="Cover" class="w-full h-full object-cover hidden" />
-                <svg id="np-cover-placeholder" class="w-14 h-14 text-slate-400 dark:text-zinc-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/>
-                </svg>
-              </div>
-
-              <!-- Track Information -->
-              <div class="flex flex-col justify-center min-w-0 flex-1">
-                <h3 id="np-title" class="font-bold text-sm sm:text-base truncate">No Song Selected</h3>
-                <p id="np-artist" class="text-xs text-slate-600 dark:text-slate-400 truncate mt-0.5">Unknown Artist</p>
-                <p id="np-album" class="text-[11px] text-slate-500 dark:text-slate-500 truncate mt-0.5">Unknown Album</p>
-                <p id="np-track-num" class="text-[10px] text-slate-400 mt-2 font-mono">0 of 0</p>
-              </div>
-            </div>
-
-            <!-- Progress & Time Indicators -->
-            <div class="mt-2 shrink-0">
-              <div class="w-full bg-slate-300 dark:bg-zinc-700 h-2 rounded-full overflow-hidden border border-slate-400/30">
-                <div id="np-progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-full w-0 transition-all duration-200"></div>
-              </div>
-              <div class="flex justify-between text-[10px] font-mono mt-1 text-slate-600 dark:text-slate-400">
-                <span id="np-time-current">0:00</span>
-                <span id="np-time-remaining">-0:00</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Songs / Library List View -->
-          <div id="view-list" class="absolute inset-0 hidden flex flex-col">
-            <div id="list-items" class="flex-1 overflow-y-auto py-1">
-              <!-- Dynamically filled track list -->
-            </div>
-          </div>
-
-          <!-- Empty Library Notice / Import Prompt -->
-          <div id="view-empty" class="absolute inset-0 hidden flex flex-col items-center justify-center p-4 text-center">
-            <svg class="w-12 h-12 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-2v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zM9 10l12-2"></path>
-            </svg>
-            <p class="text-xs font-semibold">No Music in Library</p>
-            <p class="text-[10px] text-slate-500 mt-1">Go to <span class="font-bold">Settings &gt; Add Songs</span> to import audio from your iPhone Files.</p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- iPod Click Wheel Section -->
-    <div class="flex items-center justify-center my-2">
-      <div id="click-wheel" class="click-wheel-bg relative w-64 h-64 sm:w-68 sm:h-68 rounded-full flex items-center justify-center cursor-pointer select-none border border-slate-300 dark:border-zinc-700">
-        
-        <!-- MENU Button -->
-        <button id="btn-menu" class="absolute top-4 text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider hover:text-slate-900 transition-colors py-2 px-4">MENU</button>
-        
-        <!-- PREVIOUS / REWIND Button -->
-        <button id="btn-prev" class="absolute left-4 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-colors p-3">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
-          </svg>
-        </button>
-
-        <!-- NEXT / FAST FORWARD Button -->
-        <button id="btn-next" class="absolute right-4 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-colors p-3">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6-8.5-6z"/>
-          </svg>
-        </button>
-
-        <!-- PLAY / PAUSE Button -->
-        <button id="btn-play" class="absolute bottom-4 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-colors p-2">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-          </svg>
-        </button>
-
-        <!-- CENTER SELECT BUTTON -->
-        <div id="btn-center" class="center-btn w-24 h-24 rounded-full border border-slate-300 dark:border-zinc-700 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Hidden Native Audio Element & File Input -->
-    <audio id="audio-player" class="hidden" preload="auto"></audio>
-    <input type="file" id="file-input" accept="audio/*" multiple class="hidden" />
-
-    <!-- Bottom Decorative Branding -->
-    <div class="text-center pb-1">
-      <span class="text-[10px] tracking-widest font-semibold uppercase text-slate-400 dark:text-zinc-600">30GB</span>
+      <div class="wheel-center" id="btn-center"></div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
-    Notification
-  </div>
+  <input type="file" id="file-input" accept="audio/*" multiple>
+  <audio id="audio-player"></audio>
 
   <script>
-    /* ===================================================================
-       1. INDEXEDDB STORAGE SYSTEM (Persists audio files across sessions)
-       =================================================================== */
-    const DB_NAME = 'iPodSimulatorDB';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'songs';
-    let db = null;
+    /* ===================================================
+       1. IndexedDB Setup for Persistent Local File Storage
+       =================================================== */
+    let db;
+    const request = indexedDB.open("iPodMusicDB", 1);
 
-    function initDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onerror = (e) => reject('Database error: ' + e.target.errorCode);
-        request.onsuccess = (e) => {
-          db = e.target.result;
-          resolve(db);
-        };
-        request.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-            store.createIndex('title', 'title', { unique: false });
-            store.createIndex('artist', 'artist', { unique: false });
-            store.createIndex('album', 'album', { unique: false });
-          }
-        };
-      });
-    }
-
-    function saveSongToDB(songData) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction([STORE_NAME], 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.add(songData);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject('Error saving song');
-      });
-    }
-
-    function getAllSongsFromDB() {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction([STORE_NAME], 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject('Error fetching songs');
-      });
-    }
-
-    function clearAllSongsFromDB() {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction([STORE_NAME], 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.clear();
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject('Error clearing songs');
-      });
-    }
-
-    /* ===================================================================
-       2. AUDIO SYNTHESIZER FOR CLICK WHEEL SOUND
-       =================================================================== */
-    let audioCtx = null;
-    let clickSoundEnabled = true;
-
-    function playClickSound() {
-      if (!clickSoundEnabled) return;
-      try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.015);
-        
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.015);
-        
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.015);
-      } catch (e) {
-        // Fallback for browsers that restrict WebAudio without user action
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("songs")) {
+        db.createObjectStore("songs", { keyPath: "id", autoIncrement: true });
       }
-    }
-
-    /* ===================================================================
-       3. APP STATE MANAGEMENT
-       =================================================================== */
-    const state = {
-      playlist: [],        // Loaded track metadata + Blob URLs
-      currentIndex: 0,     // Active track index
-      isPlaying: false,
-      
-      // UI Navigation State
-      currentView: 'menu', // 'menu', 'now-playing', 'songs', 'artists', 'albums', 'settings'
-      menuStack: ['main'], // History stack for Menu button navigation
-      selectedIndex: 0,    // Highlighted item index in active menu
-      
-      // Filtered views
-      activeListItems: [],
-      filteredCategory: null,
-      
-      // Theme
-      darkMode: false
     };
 
-    // DOM References
-    const audioPlayer = document.getElementById('audio-player');
-    const fileInput = document.getElementById('file-input');
-    const headerTitle = document.getElementById('header-title');
-    const headerStatusIcon = document.getElementById('header-status-icon');
-    
-    const viewMenu = document.getElementById('view-menu');
-    const viewNowPlaying = document.getElementById('view-now-playing');
-    const viewList = document.getElementById('view-list');
-    const viewEmpty = document.getElementById('view-empty');
-    
-    const menuItemsList = document.getElementById('menu-items-list');
-    const listItems = document.getElementById('list-items');
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      loadSongsFromDB();
+    };
 
-    /* ===================================================================
-       4. MENU STRUCTURE DEFINITIONS
-       =================================================================== */
+    /* ===================================================
+       2. Application State & Audio Management
+       =================================================== */
+    const audio = document.getElementById('audio-player');
+    const fileInput = document.getElementById('file-input');
+    const screenBody = document.getElementById('screen-body');
+    const headerTitle = document.getElementById('header-title');
+    const playStateIcon = document.getElementById('play-state-icon');
+
+    let songs = [];
+    let currentMenu = 'main'; // 'main', 'songs', 'nowPlaying', 'settings'
+    let selectedIndex = 0;
+    let currentSongIndex = -1;
+    let isClickSoundEnabled = true;
+
+    // Hard Drive Buffer Simulation
+    const HDD_BUFFER_DELAY = 400; // 400ms delay to simulate original iPod disk seek
+
+    // Button Long Press / Hold State Management
+    let holdTimer = null;
+    let seekInterval = null;
+    let isHolding = false;
+
+    // Audio Click Synthesizer for Click Wheel
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClickSound() {
+      if (!isClickSoundEnabled) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.015);
+    }
+
+    /* Save uploaded files into IndexedDB */
+    function saveFilesToDB(files) {
+      const transaction = db.transaction(["songs"], "readwrite");
+      const store = transaction.objectStore("songs");
+
+      Array.from(files).forEach(file => {
+        const songData = {
+          name: file.name.replace(/\.[^/.]+$/, ""),
+          artist: "Unknown Artist",
+          album: "Local Music",
+          blob: file
+        };
+        store.add(songData);
+      });
+
+      transaction.oncomplete = () => {
+        loadSongsFromDB();
+      };
+    }
+
+    /* Retrieve stored files from IndexedDB */
+    function loadSongsFromDB() {
+      if (!db) return;
+      const transaction = db.transaction(["songs"], "readonly");
+      const store = transaction.objectStore("songs");
+      const getAll = store.getAll();
+
+      getAll.onsuccess = () => {
+        songs = getAll.result.map(song => ({
+          ...song,
+          url: URL.createObjectURL(song.blob)
+        }));
+        renderMenu();
+      };
+    }
+
+    /* Clear persistent database */
+    function clearLibrary() {
+      const transaction = db.transaction(["songs"], "readwrite");
+      const store = transaction.objectStore("songs");
+      store.clear().onsuccess = () => {
+        songs = [];
+        audio.pause();
+        audio.src = '';
+        currentSongIndex = -1;
+        renderMenu();
+      };
+    }
+
+    /* ===================================================
+       3. Interface Navigation & Rendering
+       =================================================== */
     const menus = {
       main: [
-        { id: 'now-playing', label: 'Now Playing', action: () => openNowPlaying() },
-        { id: 'songs', label: 'Songs', action: () => openSongsList() },
-        { id: 'artists', label: 'Artists', action: () => openCategoryList('artists') },
-        { id: 'albums', label: 'Albums', action: () => openCategoryList('albums') },
-        { id: 'settings', label: 'Settings', action: () => openSubMenu('settings') }
+        { label: 'Now Playing', action: () => navigateTo('nowPlaying') },
+        { label: 'Songs', action: () => navigateTo('songs') },
+        { label: 'Settings', action: () => navigateTo('settings') }
       ],
       settings: [
-        { id: 'add-songs', label: 'Add Songs...', action: () => fileInput.click() },
-        { id: 'click-sound', label: 'Click Sound: ON', action: toggleClickSound },
-        { id: 'theme', label: 'Theme: Light', action: toggleTheme },
-        { id: 'clear-db', label: 'Clear Music Library', action: clearLibrary }
+        { label: 'Add Songs...', action: () => fileInput.click() },
+        { label: 'Toggle Theme', action: () => document.body.classList.toggle('dark-theme') },
+        { label: 'Click Sound: ON/OFF', action: () => { isClickSoundEnabled = !isClickSoundEnabled; } },
+        { label: 'Clear Library', action: () => clearLibrary() }
       ]
     };
 
-    /* ===================================================================
-       5. UI RENDER FUNCTIONS
-       =================================================================== */
-    function renderCurrentView() {
-      // Hide all main containers first
-      viewMenu.classList.add('hidden');
-      viewNowPlaying.classList.add('hidden');
-      viewList.classList.add('hidden');
-      viewEmpty.classList.add('hidden');
-
-      const activeMenuId = state.menuStack[state.menuStack.length - 1];
-
-      if (state.currentView === 'now-playing') {
-        viewNowPlaying.classList.remove('hidden');
-        headerTitle.textContent = 'Now Playing';
-        updateNowPlayingUI();
-      } 
-      else if (state.currentView === 'menu') {
-        viewMenu.classList.remove('hidden');
-        headerTitle.textContent = activeMenuId === 'main' ? 'iPod' : capitalize(activeMenuId);
-        renderMenuList(menus[activeMenuId]);
-      } 
-      else if (state.currentView === 'list') {
-        if (state.activeListItems.length === 0) {
-          viewEmpty.classList.remove('hidden');
-        } else {
-          viewList.classList.remove('hidden');
-          renderDataList(state.activeListItems);
-        }
-      }
+    function navigateTo(menuKey) {
+      if (menuKey === 'nowPlaying' && currentSongIndex === -1) return;
+      currentMenu = menuKey;
+      selectedIndex = 0;
+      renderMenu();
     }
 
-    function renderMenuList(items) {
-      menuItemsList.innerHTML = '';
-      items.forEach((item, index) => {
-        const isSelected = index === state.selectedIndex;
-        const div = document.createElement('div');
-        div.className = `flex items-center justify-between px-3 py-1.5 text-xs font-semibold cursor-pointer ${
-          isSelected 
-            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' 
-            : 'text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-zinc-800'
-        }`;
+    function renderMenu() {
+      screenBody.innerHTML = '';
+
+      if (currentMenu === 'nowPlaying') {
+        headerTitle.innerText = "Now Playing";
+        const song = songs[currentSongIndex] || { name: "No Track", artist: "-", album: "-" };
         
-        div.innerHTML = `
-          <span class="truncate">${item.label}</span>
-          <span class="text-[10px] opacity-70">›</span>
-        `;
-        menuItemsList.appendChild(div);
-      });
-      scrollToSelected(menuItemsList);
-    }
-
-    function renderDataList(items) {
-      listItems.innerHTML = '';
-      items.forEach((item, index) => {
-        const isSelected = index === state.selectedIndex;
-        const div = document.createElement('div');
-        div.className = `flex items-center justify-between px-3 py-1.5 text-xs border-b border-slate-200/50 dark:border-zinc-800/50 cursor-pointer ${
-          isSelected 
-            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold' 
-            : 'text-slate-800 dark:text-slate-200'
-        }`;
-
-        if (item.type === 'song') {
-          div.innerHTML = `
-            <div class="truncate pr-2">
-              <div class="truncate">${item.title}</div>
-              <div class="text-[10px] opacity-70 truncate">${item.artist}</div>
+        screenBody.innerHTML = `
+          <div class="now-playing">
+            <div class="np-top">
+              <div class="album-art">🎵</div>
+              <div class="track-meta">
+                <div class="title">${song.name}</div>
+                <div class="artist">${song.artist}</div>
+                <div class="album">${song.album}</div>
+              </div>
             </div>
-            ${item.id === state.playlist[state.currentIndex]?.id ? '<span class="text-[10px]">▶</span>' : ''}
-          `;
-        } else {
-          // Category item (Artist or Album)
-          div.innerHTML = `
-            <span class="truncate">${item.name}</span>
-            <span class="text-[10px] opacity-70">›</span>
-          `;
-        }
-        listItems.appendChild(div);
-      });
-      scrollToSelected(listItems);
-    }
-
-    function scrollToSelected(container) {
-      const selectedEl = container.children[state.selectedIndex];
-      if (selectedEl) {
-        selectedEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
-    }
-
-    function updateNowPlayingUI() {
-      const currentTrack = state.playlist[state.currentIndex];
-      const npTitle = document.getElementById('np-title');
-      const npArtist = document.getElementById('np-artist');
-      const npAlbum = document.getElementById('np-album');
-      const npTrackNum = document.getElementById('np-track-num');
-      const npCover = document.getElementById('np-cover');
-      const npCoverPlaceholder = document.getElementById('np-cover-placeholder');
-
-      if (!currentTrack) {
-        npTitle.textContent = 'No Song Selected';
-        npArtist.textContent = 'Unknown Artist';
-        npAlbum.textContent = 'Unknown Album';
-        npTrackNum.textContent = '0 of 0';
-        npCover.classList.add('hidden');
-        npCoverPlaceholder.classList.remove('hidden');
+            <div class="progress-section">
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+              </div>
+              <div class="time-stamps">
+                <span id="time-curr">0:00</span>
+                <span id="time-rem">-0:00</span>
+              </div>
+            </div>
+          </div>
+        `;
+        updateProgress();
         return;
       }
 
-      npTitle.textContent = currentTrack.title || 'Unknown Title';
-      npArtist.textContent = currentTrack.artist || 'Unknown Artist';
-      npAlbum.textContent = currentTrack.album || 'Unknown Album';
-      npTrackNum.textContent = `${state.currentIndex + 1} of ${state.playlist.length}`;
-
-      if (currentTrack.coverUrl) {
-        npCover.src = currentTrack.coverUrl;
-        npCover.classList.remove('hidden');
-        npCoverPlaceholder.classList.add('hidden');
-      } else {
-        npCover.classList.add('hidden');
-        npCoverPlaceholder.classList.remove('hidden');
-      }
-    }
-
-    /* ===================================================================
-       6. NAVIGATION & CLICK WHEEL CONTROL LOGIC
-       =================================================================== */
-    function handleSelect() {
-      playClickSound();
-      if (state.currentView === 'menu') {
-        const activeMenuId = state.menuStack[state.menuStack.length - 1];
-        const currentMenu = menus[activeMenuId];
-        if (currentMenu && currentMenu[state.selectedIndex]) {
-          currentMenu[state.selectedIndex].action();
-        }
-      } 
-      else if (state.currentView === 'list') {
-        const selectedItem = state.activeListItems[state.selectedIndex];
-        if (!selectedItem) return;
-
-        if (selectedItem.type === 'song') {
-          // Play chosen song
-          const trackIndex = state.playlist.findIndex(s => s.id === selectedItem.id);
-          if (trackIndex !== -1) {
-            playTrack(trackIndex);
-            openNowPlaying();
-          }
-        } else if (selectedItem.type === 'artist') {
-          // Filter songs by Artist
-          const filtered = state.playlist.filter(s => s.artist === selectedItem.name);
-          state.activeListItems = filtered.map(s => ({ ...s, type: 'song' }));
-          headerTitle.textContent = selectedItem.name;
-          state.selectedIndex = 0;
-          renderCurrentView();
-        } else if (selectedItem.type === 'album') {
-          // Filter songs by Album
-          const filtered = state.playlist.filter(s => s.album === selectedItem.name);
-          state.activeListItems = filtered.map(s => ({ ...s, type: 'song' }));
-          headerTitle.textContent = selectedItem.name;
-          state.selectedIndex = 0;
-          renderCurrentView();
-        }
-      }
-    }
-
-    function handleMenuButton() {
-      playClickSound();
-      if (state.currentView === 'now-playing') {
-        state.currentView = state.menuStack.length > 1 ? 'menu' : 'menu';
-        renderCurrentView();
-        return;
+      let items = [];
+      if (currentMenu === 'main') {
+        headerTitle.innerText = "iPod";
+        items = menus.main;
+      } else if (currentMenu === 'settings') {
+        headerTitle.innerText = "Settings";
+        items = menus.settings;
+      } else if (currentMenu === 'songs') {
+        headerTitle.innerText = "Songs";
+        items = songs.length > 0 
+          ? songs.map((s, idx) => ({ label: s.name, action: () => playSong(idx) }))
+          : [{ label: 'No Songs Found', action: () => {} }];
       }
 
-      if (state.currentView === 'list') {
-        state.currentView = 'menu';
-        renderCurrentView();
-        return;
-      }
+      const ul = document.createElement('ul');
+      ul.className = 'menu-list';
 
-      if (state.currentView === 'menu') {
-        if (state.menuStack.length > 1) {
-          state.menuStack.pop();
-          state.selectedIndex = 0;
-          renderCurrentView();
-        }
-      }
-    }
-
-    function openSubMenu(menuId) {
-      state.menuStack.push(menuId);
-      state.currentView = 'menu';
-      state.selectedIndex = 0;
-      renderCurrentView();
-    }
-
-    function openSongsList() {
-      state.activeListItems = state.playlist.map(s => ({ ...s, type: 'song' }));
-      state.currentView = 'list';
-      headerTitle.textContent = 'Songs';
-      state.selectedIndex = 0;
-      renderCurrentView();
-    }
-
-    function openCategoryList(category) {
-      const map = new Map();
-      state.playlist.forEach(s => {
-        const key = s[category === 'artists' ? 'artist' : 'album'] || `Unknown ${category.slice(0, -1)}`;
-        if (!map.has(key)) map.set(key, true);
+      items.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = `menu-item ${index === selectedIndex ? 'active' : ''}`;
+        li.innerHTML = `<span>${item.label}</span><span class="chevron">&#10095;</span>`;
+        ul.appendChild(li);
       });
 
-      state.activeListItems = Array.from(map.keys()).map(name => ({
-        type: category === 'artists' ? 'artist' : 'album',
-        name: name
-      }));
+      screenBody.appendChild(ul);
 
-      state.currentView = 'list';
-      headerTitle.textContent = capitalize(category);
-      state.selectedIndex = 0;
-      renderCurrentView();
+      // Scroll active item into view
+      const activeEl = ul.children[selectedIndex];
+      if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
     }
 
-    function openNowPlaying() {
-      state.currentView = 'now-playing';
-      renderCurrentView();
-    }
+    /* ===================================================
+       4. Audio Playback Engine & Delay Logic
+       =================================================== */
+    function playSong(index) {
+      if (index < 0 || index >= songs.length) return;
+      currentSongIndex = index;
+      const song = songs[currentSongIndex];
 
-    function scrollSelection(direction) {
-      playClickSound();
-      let maxCount = 0;
+      audio.pause();
+      audio.src = song.url;
+      audio.load();
 
-      if (state.currentView === 'menu') {
-        const activeMenuId = state.menuStack[state.menuStack.length - 1];
-        maxCount = menus[activeMenuId]?.length || 0;
-      } else if (state.currentView === 'list') {
-        maxCount = state.activeListItems.length;
-      }
+      playStateIcon.innerText = "⏳"; // Hard drive buffer indicator
 
-      if (maxCount === 0) return;
+      // Simulate iPod hard drive spin-up delay
+      setTimeout(() => {
+        audio.play().then(() => {
+          playStateIcon.innerText = "▶";
+          updateMediaSession(song);
+        }).catch(e => console.error(e));
+      }, HDD_BUFFER_DELAY);
 
-      if (direction === 'next') {
-        state.selectedIndex = (state.selectedIndex + 1) % maxCount;
-      } else {
-        state.selectedIndex = (state.selectedIndex - 1 + maxCount) % maxCount;
-      }
-
-      renderCurrentView();
-    }
-
-    /* ===================================================================
-       7. ROTATIONAL TOUCH & WHEEL GESTURE DETECTOR
-       =================================================================== */
-    const clickWheel = document.getElementById('click-wheel');
-    let lastAngle = null;
-    let angleAccumulator = 0;
-    const ANGLE_THRESHOLD = 18; // Degrees of rotation to trigger 1 step scroll
-
-    function getAngle(x, y, rect) {
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      return Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
-    }
-
-    function handlePointerStart(e) {
-      const rect = clickWheel.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      lastAngle = getAngle(clientX, clientY, rect);
-      angleAccumulator = 0;
-    }
-
-    function handlePointerMove(e) {
-      if (lastAngle === null) return;
-      e.preventDefault(); // Prevent iOS bounce/scroll while using wheel
-      
-      const rect = clickWheel.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const currentAngle = getAngle(clientX, clientY, rect);
-
-      let delta = currentAngle - lastAngle;
-      if (delta > 180) delta -= 360;
-      if (delta < -180) delta += 360;
-
-      angleAccumulator += delta;
-      lastAngle = currentAngle;
-
-      if (Math.abs(angleAccumulator) >= ANGLE_THRESHOLD) {
-        const dir = angleAccumulator > 0 ? 'next' : 'prev';
-        scrollSelection(dir);
-        angleAccumulator = 0;
-      }
-    }
-
-    function handlePointerEnd() {
-      lastAngle = null;
-      angleAccumulator = 0;
-    }
-
-    clickWheel.addEventListener('touchstart', handlePointerStart, { passive: false });
-    clickWheel.addEventListener('touchmove', handlePointerMove, { passive: false });
-    clickWheel.addEventListener('touchend', handlePointerEnd);
-    
-    clickWheel.addEventListener('mousedown', handlePointerStart);
-    window.addEventListener('mousemove', handlePointerMove);
-    window.addEventListener('mouseup', handlePointerEnd);
-
-    /* ===================================================================
-       8. PLAYBACK & MEDIASESSION (Background Playback support)
-       =================================================================== */
-    function playTrack(index) {
-      if (index < 0 || index >= state.playlist.length) return;
-      state.currentIndex = index;
-      const track = state.playlist[state.currentIndex];
-
-      audioPlayer.src = track.blobUrl;
-      audioPlayer.play().then(() => {
-        state.isPlaying = true;
-        updateMediaSession(track);
-        headerStatusIcon.textContent = '▶';
-        renderCurrentView();
-      }).catch(err => {
-        console.error("Autoplay failed:", err);
-      });
+      navigateTo('nowPlaying');
     }
 
     function togglePlayPause() {
-      playClickSound();
-      if (state.playlist.length === 0) return;
-
-      if (audioPlayer.paused) {
-        audioPlayer.play();
-        state.isPlaying = true;
-        headerStatusIcon.textContent = '▶';
+      if (currentSongIndex === -1 && songs.length > 0) {
+        playSong(0);
+        return;
+      }
+      if (audio.paused) {
+        audio.play();
+        playStateIcon.innerText = "▶";
       } else {
-        audioPlayer.pause();
-        state.isPlaying = false;
-        headerStatusIcon.textContent = '⏸';
+        audio.pause();
+        playStateIcon.innerText = "⏸";
       }
     }
 
-    function playNextTrack() {
-      playClickSound();
-      if (state.playlist.length === 0) return;
-      let nextIndex = (state.currentIndex + 1) % state.playlist.length;
-      playTrack(nextIndex);
-    }
-
-    function playPrevTrack() {
-      playClickSound();
-      if (state.playlist.length === 0) return;
-      // If song played for > 3 seconds, restart it; otherwise go to prev track
-      if (audioPlayer.currentTime > 3) {
-        audioPlayer.currentTime = 0;
+    /* Smart Rewind Logic: Restart song if > 3s, else go to previous track */
+    function handlePreviousTrack() {
+      if (audio.currentTime > 3) {
+        audio.currentTime = 0;
       } else {
-        let prevIndex = (state.currentIndex - 1 + state.playlist.length) % state.playlist.length;
-        playTrack(prevIndex);
-      }
-    }
-
-    // Media Session Integration for iOS Lock Screen & Controls
-    function updateMediaSession(track) {
-      if ('mediaSession' in navigator) {
-        const artwork = track.coverUrl ? [
-          { src: track.coverUrl, sizes: '512x512', type: 'image/png' }
-        ] : [];
-
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: track.title || 'Unknown Track',
-          artist: track.artist || 'Unknown Artist',
-          album: track.album || 'iPod Classic',
-          artwork: artwork
-        });
-
-        navigator.mediaSession.setActionHandler('play', () => {
-          audioPlayer.play();
-          state.isPlaying = true;
-          headerStatusIcon.textContent = '▶';
-        });
-
-        navigator.mediaSession.setActionHandler('pause', () => {
-          audioPlayer.pause();
-          state.isPlaying = false;
-          headerStatusIcon.textContent = '⏸';
-        });
-
-        navigator.mediaSession.setActionHandler('previoustrack', playPrevTrack);
-        navigator.mediaSession.setActionHandler('nexttrack', playNextTrack);
-      }
-    }
-
-    // Update Progress Bar
-    audioPlayer.addEventListener('timeupdate', () => {
-      if (isNaN(audioPlayer.duration)) return;
-      
-      const currentTime = audioPlayer.currentTime;
-      const duration = audioPlayer.duration;
-      const progressPercent = (currentTime / duration) * 100;
-
-      document.getElementById('np-progress-bar').style.width = `${progressPercent}%`;
-      document.getElementById('np-time-current').textContent = formatTime(currentTime);
-      document.getElementById('np-time-remaining').textContent = `-${formatTime(duration - currentTime)}`;
-    });
-
-    audioPlayer.addEventListener('ended', () => {
-      playNextTrack();
-    });
-
-    /* ===================================================================
-       9. FILE IMPORTING & ID3 TAG PARSING
-       =================================================================== */
-    fileInput.addEventListener('change', async (e) => {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-
-      showToast(`Importing ${files.length} track(s)...`);
-
-      for (const file of files) {
-        try {
-          const metadata = await parseAudioMetadata(file);
-          const songObj = {
-            title: metadata.title || cleanFilename(file.name),
-            artist: metadata.artist || 'Unknown Artist',
-            album: metadata.album || 'Unknown Album',
-            blob: file, // Store File/Blob in IndexedDB
-            coverBlob: metadata.coverBlob || null
-          };
-
-          const id = await saveSongToDB(songObj);
-          
-          // Add to active runtime playlist
-          const blobUrl = URL.createObjectURL(file);
-          const coverUrl = metadata.coverBlob ? URL.createObjectURL(metadata.coverBlob) : null;
-          
-          state.playlist.push({
-            id,
-            title: songObj.title,
-            artist: songObj.artist,
-            album: songObj.album,
-            blobUrl,
-            coverUrl
-          });
-
-        } catch (err) {
-          console.error("Error parsing song:", err);
+        if (currentSongIndex > 0) {
+          playSong(currentSongIndex - 1);
+        } else {
+          audio.currentTime = 0;
         }
       }
+    }
 
-      showToast("Music imported successfully!");
-      renderCurrentView();
-    });
+    function handleNextTrack() {
+      if (currentSongIndex < songs.length - 1) {
+        playSong(currentSongIndex + 1);
+      }
+    }
 
-    function parseAudioMetadata(file) {
-      return new Promise((resolve) => {
-        if (!window.jsmediatags) {
-          resolve({ title: cleanFilename(file.name) });
-          return;
-        }
-
-        window.jsmediatags.read(file, {
-          onSuccess: (tag) => {
-            const tags = tag.tags;
-            let coverBlob = null;
-
-            if (tags.picture) {
-              const { data, format } = tags.picture;
-              let base64String = "";
-              for (let i = 0; i < data.length; i++) {
-                base64String += String.fromCharCode(data[i]);
-              }
-              const base64 = "data:" + format + ";base64," + window.btoa(base64String);
-              
-              // Convert base64 to Blob
-              const byteString = atob(base64.split(',')[1]);
-              const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
-              const ab = new ArrayBuffer(byteString.length);
-              const ia = new Uint8Array(ab);
-              for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-              }
-              coverBlob = new Blob([ab], { type: mimeString });
-            }
-
-            resolve({
-              title: tags.title,
-              artist: tags.artist,
-              album: tags.album,
-              coverBlob
-            });
-          },
-          onError: () => {
-            resolve({ title: cleanFilename(file.name) });
+    /* Fast Forward & Rewind Seeking Engine */
+    function startSeeking(direction) {
+      isHolding = false;
+      holdTimer = setTimeout(() => {
+        isHolding = true;
+        seekInterval = setInterval(() => {
+          if (direction === 'ff') {
+            audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 2);
+          } else if (direction === 'rw') {
+            audio.currentTime = Math.max(0, audio.currentTime - 2);
           }
-        });
-      });
+          playClickSound();
+        }, 150);
+      }, 300);
     }
 
-    function cleanFilename(filename) {
-      return filename.replace(/\.[^/.]+$/, "");
+    function stopSeeking(direction) {
+      clearTimeout(holdTimer);
+      clearInterval(seekInterval);
+      if (!isHolding) {
+        // Registered as a normal short press tap
+        if (direction === 'ff') handleNextTrack();
+        if (direction === 'rw') handlePreviousTrack();
+      }
+      isHolding = false;
     }
 
-    async function loadLibraryFromDB() {
-      try {
-        await initDB();
-        const storedSongs = await getAllSongsFromDB();
-        
-        state.playlist = storedSongs.map(song => ({
-          id: song.id,
-          title: song.title,
+    /* iOS Lock Screen MediaSession Controls */
+    function updateMediaSession(song) {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: song.name,
           artist: song.artist,
-          album: song.album,
-          blobUrl: URL.createObjectURL(song.blob),
-          coverUrl: song.coverBlob ? URL.createObjectURL(song.coverBlob) : null
-        }));
+          album: song.album
+        });
 
-        renderCurrentView();
-      } catch (err) {
-        console.error("Failed to load IndexedDB music library:", err);
+        navigator.mediaSession.setActionHandler('play', () => { audio.play(); playStateIcon.innerText = "▶"; });
+        navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); playStateIcon.innerText = "⏸"; });
+        navigator.mediaSession.setActionHandler('previoustrack', () => handlePreviousTrack());
+        navigator.mediaSession.setActionHandler('nexttrack', () => handleNextTrack());
       }
     }
 
-    async function clearLibrary() {
-      playClickSound();
-      if (confirm("Are you sure you want to clear your iPod library?")) {
-        await clearAllSongsFromDB();
-        state.playlist = [];
-        state.currentIndex = 0;
-        audioPlayer.pause();
-        audioPlayer.src = "";
-        showToast("Library cleared.");
-        renderCurrentView();
+    function formatTime(secs) {
+      if (isNaN(secs)) return "0:00";
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function updateProgress() {
+      if (currentMenu !== 'nowPlaying') return;
+      const fill = document.getElementById('progress-fill');
+      const timeCurr = document.getElementById('time-curr');
+      const timeRem = document.getElementById('time-rem');
+
+      if (fill && audio.duration) {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        fill.style.width = `${pct}%`;
+        timeCurr.innerText = formatTime(audio.currentTime);
+        timeRem.innerText = `-${formatTime(audio.duration - audio.currentTime)}`;
       }
     }
 
-    /* ===================================================================
-       10. UTILITIES & TOGGLES
-       =================================================================== */
-    function toggleClickSound() {
-      clickSoundEnabled = !clickSoundEnabled;
-      menus.settings[1].label = `Click Sound: ${clickSoundEnabled ? 'ON' : 'OFF'}`;
-      showToast(`Click sound ${clickSoundEnabled ? 'enabled' : 'disabled'}`);
-      renderCurrentView();
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', () => handleNextTrack());
+
+    /* ===================================================
+       5. Interactive Click Wheel Drag & Touch Listener
+       =================================================== */
+    const wheel = document.getElementById('click-wheel');
+    let lastAngle = null;
+    let accumulatedRotation = 0;
+
+    function getAngle(x, y) {
+      const rect = wheel.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      return Math.atan2(y - cy, x - cx) * (180 / Math.PI);
     }
 
-    function toggleTheme() {
-      state.darkMode = !state.darkMode;
-      const container = document.getElementById('ipod-container');
-      if (state.darkMode) {
-        container.classList.add('dark');
-        document.body.classList.add('dark');
-        menus.settings[2].label = 'Theme: Dark';
-      } else {
-        container.classList.remove('dark');
-        document.body.classList.remove('dark');
-        menus.settings[2].label = 'Theme: Light';
+    function handleWheelMove(clientX, clientY) {
+      const angle = getAngle(clientX, clientY);
+      if (lastAngle !== null) {
+        let delta = angle - lastAngle;
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+
+        accumulatedRotation += delta;
+
+        // Step threshold for menu selection or volume control
+        if (Math.abs(accumulatedRotation) >= 18) {
+          playClickSound();
+          if (currentMenu === 'nowPlaying') {
+            // Adjust volume when dragging in Now Playing view
+            const volDelta = accumulatedRotation > 0 ? 0.05 : -0.05;
+            audio.volume = Math.max(0, Math.min(1, audio.volume + volDelta));
+          } else {
+            // Scroll menu lists
+            const itemsLength = currentMenu === 'main' ? menus.main.length 
+                              : currentMenu === 'settings' ? menus.settings.length 
+                              : songs.length;
+            
+            if (itemsLength > 0) {
+              if (accumulatedRotation > 0) {
+                selectedIndex = (selectedIndex + 1) % itemsLength;
+              } else {
+                selectedIndex = (selectedIndex - 1 + itemsLength) % itemsLength;
+              }
+              renderMenu();
+            }
+          }
+          accumulatedRotation = 0;
+        }
       }
-      renderCurrentView();
+      lastAngle = angle;
     }
 
-    function formatTime(seconds) {
-      if (isNaN(seconds)) return "0:00";
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
+    wheel.addEventListener('touchstart', (e) => {
+      lastAngle = getAngle(e.touches[0].clientX, e.touches[0].clientY);
+      accumulatedRotation = 0;
+    }, { passive: true });
 
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    wheel.addEventListener('touchmove', (e) => {
+      handleWheelMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
 
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.remove('opacity-0');
-      setTimeout(() => toast.classList.add('opacity-0'), 2500);
-    }
+    wheel.addEventListener('touchend', () => { lastAngle = null; });
 
-    /* ===================================================================
-       11. EVENT LISTENERS SETUP
-       =================================================================== */
+    /* Button Action Assignments */
     document.getElementById('btn-center').addEventListener('click', (e) => {
       e.stopPropagation();
-      handleSelect();
+      playClickSound();
+      if (currentMenu === 'main') menus.main[selectedIndex].action();
+      else if (currentMenu === 'settings') menus.settings[selectedIndex].action();
+      else if (currentMenu === 'songs' && songs.length > 0) playSong(selectedIndex);
     });
 
     document.getElementById('btn-menu').addEventListener('click', (e) => {
       e.stopPropagation();
-      handleMenuButton();
+      playClickSound();
+      if (currentMenu !== 'main') navigateTo('main');
     });
 
     document.getElementById('btn-play').addEventListener('click', (e) => {
       e.stopPropagation();
+      playClickSound();
       togglePlayPause();
     });
 
-    document.getElementById('btn-next').addEventListener('click', (e) => {
-      e.stopPropagation();
-      playNextTrack();
-    });
+    // Fast Forward button listeners
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.addEventListener('mousedown', () => startSeeking('ff'));
+    nextBtn.addEventListener('mouseup', () => stopSeeking('ff'));
+    nextBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); startSeeking('ff'); }, { passive: true });
+    nextBtn.addEventListener('touchend', (e) => { e.stopPropagation(); stopSeeking('ff'); });
 
-    document.getElementById('btn-prev').addEventListener('click', (e) => {
-      e.stopPropagation();
-      playPrevTrack();
-    });
+    // Fast Rewind button listeners
+    const prevBtn = document.getElementById('btn-prev');
+    prevBtn.addEventListener('mousedown', () => startSeeking('rw'));
+    prevBtn.addEventListener('mouseup', () => stopSeeking('rw'));
+    prevBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); startSeeking('rw'); }, { passive: true });
+    prevBtn.addEventListener('touchend', (e) => { e.stopPropagation(); stopSeeking('rw'); });
 
-    // Keyboard support for testing on PC
-    window.addEventListener('keydown', (e) => {
-      switch (e.key) {
-        case 'ArrowUp':
-          scrollSelection('prev');
-          break;
-        case 'ArrowDown':
-          scrollSelection('next');
-          break;
-        case 'Enter':
-          handleSelect();
-          break;
-        case 'Backspace':
-        case 'Escape':
-          handleMenuButton();
-          break;
-        case ' ':
-          togglePlayPause();
-          break;
+    // Upload Handler
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        saveFilesToDB(e.target.files);
       }
     });
 
-    // Initialization on window load
-    window.onload = () => {
-      loadLibraryFromDB();
-    };
+    // Initial Render
+    renderMenu();
   </script>
 </body>
 </html>
